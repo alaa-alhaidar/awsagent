@@ -1,6 +1,5 @@
 import time
 
-
 def fetchS3():
     # Initialize an S3 client
     s3_client = boto3.client('s3')
@@ -19,78 +18,13 @@ def fetchS3():
     else:
         print(f"No files found in {bucket_name}.")
 
-
-import boto3
-
-
-def create_emr_cluster(cluster_name, log_uri, release_label, instance_type, instance_count, key_name):
-    """
-    Creates an EMR cluster using boto3.
-
-    Parameters:
-    - cluster_name: Name of the cluster.
-    - log_uri: S3 path for EMR logs (e.g., 's3://your-log-bucket/').
-    - release_label: EMR release label (e.g., 'emr-6.10.0').
-    - instance_type: Instance type for the cluster (e.g., 'm5.xlarge').
-    - instance_count: Number of core and task nodes in the cluster.
-    - key_name: Name of the EC2 key pair for SSH access.
-    """
-    client = boto3.client('emr')
-
-    response = client.run_job_flow(
-        Name=cluster_name,
-        LogUri=log_uri,
-        ReleaseLabel=release_label,
-        Instances={
-            'InstanceGroups': [
-                {
-                    'Name': 'Master node',
-                    'Market': 'ON_DEMAND',
-                    'InstanceRole': 'MASTER',
-                    'InstanceType': instance_type,
-                    'InstanceCount': 1,
-                },
-                {
-                    'Name': 'Core nodes',
-                    'Market': 'ON_DEMAND',
-                    'InstanceRole': 'CORE',
-                    'InstanceType': instance_type,
-                    'InstanceCount': instance_count,
-                },
-            ],
-            'KeepJobFlowAliveWhenNoSteps': True,
-            'TerminationProtected': False,
-            'Ec2KeyName': key_name,
-        },
-        Applications=[
-            {'Name': 'Hadoop'},
-            {'Name': 'Spark'},  # Include Spark for running Spark jobs
-        ],
-        Configurations=[
-            {
-                'Classification': 'spark-env',
-                'Configurations': [
-                    {
-                        'Classification': 'export',
-                        'Properties': {
-                            'PYSPARK_PYTHON': '/usr/bin/python3',
-                        },
-                    }
-                ],
-            }
-        ],
-        VisibleToAllUsers=True,
-        JobFlowRole='EMR_for_EC2_role',
-        ServiceRole='EMR_ROLE',
-    )
-
-    return response
 # Function to list instance groups
 def list_instance_groups(cluster_id):
     emr_client = boto3.client('emr')
     response = emr_client.list_instance_groups(ClusterId=cluster_id)
 
     return response['InstanceGroups']
+
 
 # Function to modify EMR cluster
 def modify_emr_cluster(cluster_id, instance_group_id, instance_count, step_config=None):
@@ -112,8 +46,6 @@ def modify_emr_cluster(cluster_id, instance_group_id, instance_count, step_confi
 
 import boto3
 
-
-import boto3
 
 def add_spark_step(cluster_id, step_name, jar_path):
     """
@@ -222,19 +154,8 @@ def get_step_metrics(cluster_id, step_id):
     }
 
 
-
-
 if __name__ == '__main__':
-    #fetchS3()
-
-    # Define your parameters if you want to create new cluster
-    cluster_name = "MyEMRCluster"
-    log_uri = "s3://alaa-bucket/"
-    release_label = "emr-6.10.0"
-    instance_type = "m5.xlarge"
-    instance_count = 2
-    key_name = "alaa.alhaidar_eu"
-    #create_emr_cluster(cluster_name,log_uri,release_label,instance_type,instance_count,key_name)
+    fetchS3()
 
     # Fetch instance groups and modify the CORE group
     # provide always cluster ID
@@ -249,20 +170,15 @@ if __name__ == '__main__':
     else:
         print("No CORE instance group found in the cluster.")
 
-    # Cluster ID of the running EMR cluster
-    cluster_id = 'j-1RLZ3X860G5TP'
-
-    # Define the step parameters
-    step_name = "Run Word Count"
-    script_s3_path = 's3://your-bucket/scripts/wordcount.py'
-    script_args = ['s3://your-bucket/input/', 's3://alaa-bucket/output/']
-
     # Define your EMR cluster ID and step parameters
     cluster_id = 'j-1RLZ3X860G5TP'
     step_name = "Run Custom Spark Job"
     jar_path = 's3://alaa-bucket/custom-jar-name_scala2.12-0.1.jar'
 
-    # Example usage:
-    step_id = add_spark_step(cluster_id, step_name, jar_path)
-    metrics = get_step_metrics(cluster_id, step_id)
-    print(metrics)
+    x=0
+    while x < 2:
+        # Example usage:
+        step_id = add_spark_step(cluster_id, step_name, jar_path)
+        metrics = get_step_metrics(cluster_id, step_id)
+        print(metrics)
+        x +=1
