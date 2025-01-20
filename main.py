@@ -77,7 +77,7 @@ def stopEMR(clusterID):
     # Terminate the EMR cluster
     client = boto3.client('emr')
     response = client.terminate_job_flows(
-        JobFlowIds=[cluster_id]
+        JobFlowIds=[clusterID]
     )
     print(response, "with ", clusterID," terminated")
 
