@@ -1,7 +1,6 @@
 
 import boto3
 
-
 def create_emr_cluster(cluster_name, log_uri, release_label, instance_type, instance_count, key_name):
 
     client = boto3.client('emr')
@@ -74,6 +73,13 @@ def describe_emr_cluster(cluster_id):
     print(f"Master Public DNS: {cluster_info.get('MasterPublicDnsName')}")
     print(f"Applications: {[app['Name'] for app in cluster_info.get('Applications', [])]}")
     print(f"Log URI: {cluster_info.get('LogUri')}")
+def stopEMR(clusterID):
+    # Terminate the EMR cluster
+    client = boto3.client('emr')
+    response = client.terminate_job_flows(
+        JobFlowIds=[cluster_id]
+    )
+    print(response, "with ", clusterID," terminated")
 
 if __name__ == '__main__':
     cluster_name = "MyEMRCluster"
@@ -92,3 +98,4 @@ if __name__ == '__main__':
     describe_emr_cluster(cluster_id)
 
 
+#git push -u origin main
